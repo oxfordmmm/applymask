@@ -1,6 +1,7 @@
 import math
 import gzip
 import argparse
+import pathlib
 
 # format 1, similar to fasta;
 # >header
@@ -60,7 +61,7 @@ def apply_mask(mask, sequence):
             new_sequence.append(sequence[i])
     new_sequence_str = "".join(new_sequence)
     return new_sequence_str
-        
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("mask_filepath")
@@ -77,7 +78,13 @@ def main():
 
     new_sequence = apply_mask(mask, fasta_sequence)
 
-    new_fasta_filepath = args.fasta_filepath + ".newmask"
+    fasta_filename = pathlib.Path(args.fasta_filepath).stem
+    if args.use_gzip == "true":
+        new_fasta_filepath = fasta_filename + '.masked.gz'
+    else:
+        new_fasta_filepath = fasta_filename + '.masked.fasta'
+
+
     if args.use_gzip == "true":
         save_fasta_gzip(new_fasta_filepath, fasta_header, new_sequence, fasta_chunk_len)
     else:
@@ -85,4 +92,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
