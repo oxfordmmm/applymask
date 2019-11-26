@@ -41,7 +41,7 @@ def load_mask_format3(mask_filepath, length):
     masked_ranges = list()
     for line in lines:
         try:
-            begin, end = line.split('\t')
+            begin, end = line.strip().split('\t')
             masked_ranges.append((int(begin), int(end)))
         except ValueError:
             print(f"masked range '{line}' couldn't be parsed")
