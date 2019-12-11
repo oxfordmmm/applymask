@@ -33,6 +33,60 @@ def load_mask_format2(mask_filepath, length):
             mask.append('0')
     return mask
 
+# range format
+# tsv range per line
+def load_mask_format3(mask_filepath, length):
+    with open(mask_filepath) as f:
+        lines = f.readlines()
+    masked_ranges = list()
+    for line in lines:
+        try:
+            begin, end = line.strip().split('\t')
+            masked_ranges.append((int(begin), int(end)))
+        except ValueError:
+            print(f"masked range '{line}' couldn't be parsed")
+    mask = list()
+    for i in range(0, length):
+        mask.append('0')
+    for begin, end in masked_ranges:
+        for i in range(begin, end):
+            mask[i] = '1'
+    return mask
+
+# [1,2,3,4,5,7] -> "1-5,7"
+def lst_to_range_str(lst):
+    ret = list()
+    start = None
+    end = None
+    for elem in lst:
+        if not start:
+            start = elem
+            end = elem
+        if elem == end or elem == end + 1:
+            end = elem
+        else:
+            if start == end:
+                ret.append((start, start))
+            else:
+                ret.append((start, end))
+            start = elem
+            end = elem
+    if start:
+        if start == end:
+            ret.append((start, start))
+        else:
+            ret.append((start, end))
+    return ret
+
+def print_mask_format3(fasta_mask):
+    bleh = list()
+    for i, x in enumerate(fasta_mask):
+        if x == '1':
+            bleh.append(i)
+    bleh2 = lst_to_range_str(bleh)
+    bleh3 = [f"{x}\t{y+1}" for (x, y) in bleh2]
+    print("\n".join(bleh3))
+
 def load_fasta(fasta_filepath):
     with open(fasta_filepath) as f:
         lines = f.readlines()
@@ -54,8 +108,6 @@ def string_insert_newlines(in_str, chunk_len):
     for i in range(0, math.ceil(len(in_str) / chunk_len)):
         chunk = in_str[i * chunk_len:(i + 1) * chunk_len]
         ret.append(chunk)
-        #print(i, i * chunk_len, (i + 1) * chunk_len, chunk)
-    #print(ret)
     new_str = "\n".join(ret)
     return new_str
 
@@ -87,6 +139,7 @@ def main():
     p.add_argument("mask_format")
     p.add_argument("fasta_filepath")
     p.add_argument("use_gzip")
+    p.add_argument("print_mask_ranges")
     args = p.parse_args()
 
     if args.use_gzip == "true":
@@ -94,13 +147,15 @@ def main():
     else:
         (fasta_header, fasta_sequence, fasta_chunk_len) = load_fasta(args.fasta_filepath)
 
-    if args.mask_format == "format1":
+    if args.mask_format == "fasta":
         mask = load_mask_format1(args.mask_filepath)
     elif args.mask_format == "dwyllie":
         mask = load_mask_format2(args.mask_filepath, len(fasta_sequence))
+    elif args.mask_format == "ranges":
+        mask = load_mask_format3(args.mask_filepath, len(fasta_sequence))
     else:
         print(f"unknown mask format: {args.mask_format}")
-        print("expected one of: format1, dwyllie")
+        print("expected one of: fasta, dwyllie, ranges")
         return
 
     new_sequence = apply_mask(mask, fasta_sequence)
@@ -111,11 +166,13 @@ def main():
     else:
         new_fasta_filepath = fasta_filename + '.masked.fasta'
 
-
     if args.use_gzip == "true":
         save_fasta_gzip(new_fasta_filepath, fasta_header, new_sequence, fasta_chunk_len)
     else:
         save_fasta(new_fasta_filepath, fasta_header, new_sequence, fasta_chunk_len)
+
+    if args.print_mask_ranges == "true":
+        print_mask_format3(mask)
 
 if __name__ == "__main__":
     main()
