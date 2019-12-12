@@ -90,8 +90,6 @@ def lst_to_range_str(lst):
     if start:
         if start == end:
             ret.append((start, start))
-        else:
-            ret.append((start, end))
     return ret
 
 def get_mask_ranges(fasta_mask):

@@ -57,12 +57,16 @@ class TestApplyMask(unittest.TestCase):
         result = applymask.lst_to_range_str(data)
         self.assertEqual(expected, result)
 
-    def test_load_mask_range(self):
+    def test_load_mask_range_aux(self):
         data = ["0\t0","5\t7", "9\t9"]
         expected = list("1000011101")
 
         result = applymask.load_mask_range_aux(data, 10)
         self.assertEqual(result, expected)
+
+    def test_load_mask_range_aux_exception(self):
+        data = ["0\ta","5\t7", "9\t9"]
+        self.assertRaises(Exception, applymask.load_mask_range_aux(data,10))
 
     def test_load_mask_position_aux(self):
         data = ["0","5", "6", "7", "9"]
@@ -70,6 +74,10 @@ class TestApplyMask(unittest.TestCase):
 
         result = applymask.load_mask_position_aux(data, 10)
         self.assertEqual(result, expected)
+
+    def test_load_mask_position_aux_exception(self):
+        data = ["a","5", "6", "7", "9"]
+        self.assertRaises(Exception, applymask.load_mask_position_aux(data,10))
     
     def test_get_mask_ranges(self):
         data = list("1000011101")
