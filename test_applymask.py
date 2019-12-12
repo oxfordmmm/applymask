@@ -125,6 +125,25 @@ class TestApplyMask(unittest.TestCase):
         self.assertEqual(header, expected_header)
         self.assertEqual(chunklen, expected_chunklen)
         self.assertEqual(expected_sequence, seq)
+    
+    def test_load_fasta_gzip(self):
+        inputfile = "tests/test.fasta.gz"
+        expected_header = ">NC_000962_3"
+        expected_chunklen = 60
+        expected_sequence = self.sequence
+
+        header, seq, chunklen = applymask.load_fasta_gzip(inputfile)
+        self.assertEqual(header, expected_header)
+        self.assertEqual(chunklen, expected_chunklen)
+        self.assertEqual(expected_sequence, seq)
+
+
+    def test_string_insert_newlines(self):
+        input_str = "AAAAAAAAAACCCCCCCCCCGGGGGGGGGGTTTTTTTTTT"
+        expected_str = "AAAAAAAAAA\nCCCCCCCCCC\nGGGGGGGGGG\nTTTTTTTTTT"
+
+        result = applymask.string_insert_newlines(input_str,10)
+        self.assertEqual(expected_str, result)
 
 
 if __name__ == "__main__":

@@ -105,15 +105,17 @@ def load_fasta(fasta_filepath):
     with open(fasta_filepath) as f:
         lines = f.readlines()
     header = lines[0].strip()
-    chunk_len = len(lines[1]) - 1
+    print(lines[1])
+    chunk_len = len(lines[1]) - 1 #remove the new line
     sequence = "".join([line.strip() for line in lines[1:]])
     return (header, sequence, chunk_len)
 
 def load_fasta_gzip(fasta_filepath):
     with gzip.open(fasta_filepath, "rb") as f:
         lines = f.read().decode().split('\n')
-    header = lines[0].strip
-    chunk_len = len(lines[1]) - 1
+    header = lines[0].strip()
+    print(lines[1])
+    chunk_len = len(lines[1]) # no new line in gzip
     sequence = "".join([line.strip() for line in lines[1:]])
     return (header, sequence, chunk_len)
 
