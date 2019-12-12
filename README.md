@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/oxfordmmm/applymask.svg?branch=master)](https://travis-ci.com/oxfordmmm/applymask)#
+[![Build Status](https://travis-ci.com/oxfordmmm/applymask.svg?branch=master)](https://travis-ci.com/oxfordmmm/applymask)
 [![codecov](https://codecov.io/gh/oxfordmmm/applymask/branch/master/graph/badge.svg)](https://codecov.io/gh/oxfordmmm/applymask)
 
 # applymask
