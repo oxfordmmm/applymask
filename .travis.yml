@@ -2,3 +2,15 @@ language: python
 
 python:
  - "3.7"
+
+before_install:
+ - pip install coverage
+
+install:
+ - pip install -r requirements.txt
+
+script:
+ - python test_applymask.py
+
+after_success:
+ - coverage run applymask.py tests/mask_fasta.fasta fasta tests/test.fasta false true
