@@ -13,6 +13,28 @@ class TestApplyMask(unittest.TestCase):
         self.fasta = "tests/test.fasta"
         self.use_gzip = "false"
         self.print_mask_ranges = "true"
+        self.expected_mask= "".join([
+                            "100000000000000000000000000000000000000000000000000000000001",
+                            "100000000000000000000000000000000000000000000000000000000001", 
+                            "100000000000000000000000000000000000000000000000000000000001", 
+                            "100000000000000000000000000000000000000000000000000000000001", 
+                            "100000000000000000000000000000000000000000000000000000000001", 
+                            "000000000000000000000000000000000000000000000000000000000000", 
+                            "000000000000000000000000000000000000000000000000000000000000", 
+                            "000000000000000000000000000000000000000000000000000000000000", 
+                            "000000000000000000000000000000000000000000000000000000000000", 
+                            "000000000000000000000000000000000000000000000000000000000000" ])
+        self.sequence = "".join([
+                            "TTGACCGATGACCCCGGTTCAGGCTTCACCACAGTGTGGAACGCGGTCGTCTCCGAACTT",
+                            "AACGGCGACCCTAAGGTTGACGACGGACCCAGCAGTGATGCTAATCTCAGCGCTCCGCTG", 
+                            "ACCCCTCAGCAAAGGGCTTGGCTCAATCTCGTCCAGCCATTGACCATCGTCGAGGGGTTT", 
+                            "GCTCTGTTATCCGTGCCGAGCAGCTTTGTCCAAAACGAAATCGAGCGCCATCTGCGGGCC", 
+                            "CCGATTACCGACGCTCTCAGCCGCCGACTCGGACATCAGATCCAACTCGGGGTCCGCATC", 
+                            "GCTCCGCCGGCGACCGACGAAGCCGACGACACTACCGTGCCGCCTTCCGAAAATCCTGCT", 
+                            "ACCACATCGCCAGACACCACAACCGACAACGACGAGATTGATGACAGCGCTGCGGCACGG", 
+                            "GGCGATAACCAGCACAGTTGGCCAAGTTACTTCACCGAGCGCCCGCACAATACCGATTCC", 
+                            "GCTACCGCTGGCGTAACCAGCCTTAACCGTCGCTACACCTTTGATACGTTCGTTATCGGC", 
+                            "GCCTCCAACCGGTTCGCGCACGCCGCCGCCTTGGCGATCGCAGAAGCACCCGCCCGCGCT" ])
 
     def test_list_to_range_str_1(self):
         data = [1,2,3,4,5,7]
@@ -63,6 +85,39 @@ class TestApplyMask(unittest.TestCase):
         expected = "NCGTANNNAN"
         result = applymask.apply_mask(mask, sequence)
         self.assertEqual(result, expected)
+
+    def test_load_mask_fasta(self):
+        inputfile = "tests/mask_fasta.fasta"
+        expected = self.expected_mask
+
+        result = applymask.load_mask_fasta(inputfile)
+        self.assertEqual(result, expected)
+    
+    def test_load_mask_position(self):
+        inputfile = "tests/mask_position.txt"
+        expected = list(self.expected_mask)
+
+        result = applymask.load_mask_positon(inputfile,600)
+        self.assertEqual(result, expected)
+
+    def test_load_mask_range(self):
+        inputfile = "tests/mask_range.tsv"
+        expected = list(self.expected_mask)
+
+        result = applymask.load_mask_range(inputfile,600)
+        self.assertEqual(result, expected)
+
+    def test_load_fasta(self):
+        inputfile = "tests/test.fasta"
+        expected_header = ">NC_000962_3"
+        expected_chunklen = 60
+        expected_sequence = self.sequence
+
+        header, seq, chunklen = applymask.load_fasta(inputfile)
+        self.assertEqual(header, expected_header)
+        self.assertEqual(chunklen, expected_chunklen)
+        self.assertEqual(expected_sequence, seq)
+
 
 if __name__ == "__main__":
     unittest.main()
