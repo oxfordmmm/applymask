@@ -105,7 +105,6 @@ def load_fasta(fasta_filepath):
     with open(fasta_filepath) as f:
         lines = f.readlines()
     header = lines[0].strip()
-    print(lines[1])
     chunk_len = len(lines[1]) - 1 #remove the new line
     sequence = "".join([line.strip() for line in lines[1:]])
     return (header, sequence, chunk_len)
@@ -114,7 +113,6 @@ def load_fasta_gzip(fasta_filepath):
     with gzip.open(fasta_filepath, "rb") as f:
         lines = f.read().decode().split('\n')
     header = lines[0].strip()
-    print(lines[1])
     chunk_len = len(lines[1]) # no new line in gzip
     sequence = "".join([line.strip() for line in lines[1:]])
     return (header, sequence, chunk_len)
@@ -131,13 +129,11 @@ def save_fasta(fasta_filepath, header, sequence, chunk_len):
     with open(fasta_filepath, "w") as f:
         f.write(header + '\n')
         f.write(string_insert_newlines(sequence, chunk_len))
-        f.write("\n")
 
 def save_fasta_gzip(fasta_filepath, header, sequence, chunk_len):
     with gzip.open(fasta_filepath, "wb") as f:
         f.write(bytearray(header + '\n', 'utf-8'))
         f.write(bytearray(string_insert_newlines(sequence, chunk_len), 'utf-8'))
-        f.write(bytearray("\n", 'utf-8'))
 
 def apply_mask(mask, sequence):
     new_sequence = list()
