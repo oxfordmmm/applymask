@@ -1,10 +1,11 @@
 # Test applymask.py
 # Run all tests: python3 test_applymask.py
-# Run one test:  python3 test_applymask.py TestApplyMask.test_load_mask_format1
-# Only skip tests for debugging reason. All tests should be passed
+# Run one test:  python3 test_applymask.py TestApplyMask.test_load_mask_range_aux
+# Run code coverage: coverge run test_applymask.py 
+# View code coverage report: coverage report -m
+# Generate code coverage html report: coverage html
 
 import os
-
 import unittest
 import applymask
 
