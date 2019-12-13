@@ -9,11 +9,24 @@ import os
 import unittest
 import applymask
 
+def assert_fasta(self, fasta_name, sequence):
+    output_masked_fasta = fasta_name
+    header, seq, chunklen = applymask.load_fasta(output_masked_fasta)
+    self.assertEqual(header, self.header)
+    self.assertEqual(chunklen, self.chunklen)
+    self.assertEqual(seq, sequence)           
+
+def assert_fasta_zip(self, zip_fasta_name, sequence):
+    output_masked_fasta_gz = zip_fasta_name
+    header, seq, chunklen = applymask.load_fasta_gzip(output_masked_fasta_gz)
+    self.assertEqual(header, self.header)
+    self.assertEqual(chunklen, self.chunklen)
+    self.assertEqual(seq, sequence)        
+
 class TestApplyMask(unittest.TestCase):
     def setUp(self):
-        self.fasta = "tests/test.fasta"
-        self.use_gzip = "false"
-        self.print_mask_ranges = "true"
+        self.header = ">NC_000962_3"
+        self.chunklen = 60
         self.expected_mask= "".join([
                             "100000000000000000000000000000000000000000000000000000000001",
                             "100000000000000000000000000000000000000000000000000000000001", 
@@ -36,6 +49,21 @@ class TestApplyMask(unittest.TestCase):
                             "GGCGATAACCAGCACAGTTGGCCAAGTTACTTCACCGAGCGCCCGCACAATACCGATTCC", 
                             "GCTACCGCTGGCGTAACCAGCCTTAACCGTCGCTACACCTTTGATACGTTCGTTATCGGC", 
                             "GCCTCCAACCGGTTCGCGCACGCCGCCGCCTTGGCGATCGCAGAAGCACCCGCCCGCGCT" ])
+        self.maskedsequence = "".join([
+                            "NTGACCGATGACCCCGGTTCAGGCTTCACCACAGTGTGGAACGCGGTCGTCTCCGAACTN",
+                            "NACGGCGACCCTAAGGTTGACGACGGACCCAGCAGTGATGCTAATCTCAGCGCTCCGCTN", 
+                            "NCCCCTCAGCAAAGGGCTTGGCTCAATCTCGTCCAGCCATTGACCATCGTCGAGGGGTTN", 
+                            "NCTCTGTTATCCGTGCCGAGCAGCTTTGTCCAAAACGAAATCGAGCGCCATCTGCGGGCN", 
+                            "NCGATTACCGACGCTCTCAGCCGCCGACTCGGACATCAGATCCAACTCGGGGTCCGCATN", 
+                            "GCTCCGCCGGCGACCGACGAAGCCGACGACACTACCGTGCCGCCTTCCGAAAATCCTGCT", 
+                            "ACCACATCGCCAGACACCACAACCGACAACGACGAGATTGATGACAGCGCTGCGGCACGG", 
+                            "GGCGATAACCAGCACAGTTGGCCAAGTTACTTCACCGAGCGCCCGCACAATACCGATTCC", 
+                            "GCTACCGCTGGCGTAACCAGCCTTAACCGTCGCTACACCTTTGATACGTTCGTTATCGGC", 
+                            "GCCTCCAACCGGTTCGCGCACGCCGCCGCCTTGGCGATCGCAGAAGCACCCGCCCGCGCT" ])
+    @classmethod
+    def tearDownClass(cls):
+        os.remove("test.masked.fasta")
+        os.remove("test.fasta.masked.gz")
 
     def test_list_to_range_str_1(self):
         data = [1,2,3,4,5,7]
@@ -117,26 +145,12 @@ class TestApplyMask(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_load_fasta(self):
-        inputfile = "tests/test.fasta"
-        expected_header = ">NC_000962_3"
-        expected_chunklen = 60
-        expected_sequence = self.sequence
-
-        header, seq, chunklen = applymask.load_fasta(inputfile)
-        self.assertEqual(header, expected_header)
-        self.assertEqual(chunklen, expected_chunklen)
-        self.assertEqual(expected_sequence, seq)
+        assert_fasta(self,"tests/test.fasta", self.sequence)
     
     def test_load_fasta_gzip(self):
         inputfile = "tests/test.fasta.gz"
-        expected_header = ">NC_000962_3"
-        expected_chunklen = 60
         expected_sequence = self.sequence
-
-        header, seq, chunklen = applymask.load_fasta_gzip(inputfile)
-        self.assertEqual(header, expected_header)
-        self.assertEqual(chunklen, expected_chunklen)
-        self.assertEqual(expected_sequence, seq)
+        assert_fasta_zip(self, inputfile, expected_sequence)
 
 
     def test_string_insert_newlines(self):
@@ -171,6 +185,78 @@ class TestApplyMask(unittest.TestCase):
         self.assertEqual(sequence,seq_out)
         os.remove(filepath)
         print(f"file {filepath} removed.")
+    
+    def test_main_fasta_nozip(self):
+        fasta_filepath = "tests/test.fasta"
+        mask_filepath = "tests/mask_fasta.fasta"
+        mask_format = "fasta"
+        use_gzip = "false"
+        print_mask_ranges = "true"
+        output_fasta = "test.masked.fasta"
+        applymask.main(mask_filepath, mask_format, fasta_filepath, use_gzip, print_mask_ranges)
+        assert_fasta(self, output_fasta, self.maskedsequence)
+
+    def test_main_position_nozip(self):
+        fasta_filepath = "tests/test.fasta"
+        mask_filepath = "tests/mask_position.txt"
+        mask_format = "position"
+        use_gzip = "false"
+        print_mask_ranges = "true"
+        output_fasta = "test.masked.fasta"
+        applymask.main(mask_filepath, mask_format, fasta_filepath, use_gzip, print_mask_ranges)
+        assert_fasta(self, output_fasta, self.maskedsequence)
+
+    def test_main_ranges_nozip(self):
+        fasta_filepath = "tests/test.fasta"
+        mask_filepath = "tests/mask_range.tsv"
+        mask_format = "range"
+        use_gzip = "false"
+        print_mask_ranges = "true"
+        output_fasta = "test.masked.fasta"
+        applymask.main(mask_filepath, mask_format, fasta_filepath, use_gzip, print_mask_ranges)
+        assert_fasta(self, output_fasta, self.maskedsequence)
+
+
+    def test_main_fasta_zip(self):
+        fasta_filepath = "tests/test.fasta.gz"
+        mask_filepath = "tests/mask_fasta.fasta"
+        mask_format = "fasta"
+        use_gzip = "true"
+        print_mask_ranges = "true"
+        output_fasta = "test.fasta.masked.gz"
+        applymask.main(mask_filepath, mask_format, fasta_filepath, use_gzip, print_mask_ranges)
+        assert_fasta_zip(self, output_fasta, self.maskedsequence)
+
+    def test_main_position_zip(self):
+        fasta_filepath = "tests/test.fasta.gz"
+        mask_filepath = "tests/mask_position.txt"
+        mask_format = "position"
+        use_gzip = "true"
+        print_mask_ranges = "true"
+        output_fasta = "test.fasta.masked.gz"
+        applymask.main(mask_filepath, mask_format, fasta_filepath, use_gzip, print_mask_ranges)
+        assert_fasta_zip(self, output_fasta, self.maskedsequence)
+
+
+    def test_main_ranges_zip(self):
+        fasta_filepath = "tests/test.fasta.gz"
+        mask_filepath = "tests/mask_range.tsv"
+        mask_format = "range"
+        use_gzip = "true"
+        print_mask_ranges = "true"
+        output_fasta = "test.fasta.masked.gz"
+        applymask.main(mask_filepath, mask_format, fasta_filepath, use_gzip, print_mask_ranges)
+        assert_fasta_zip(self, output_fasta, self.maskedsequence)
+
+    def test_main_unknown_mask(self):
+        fasta_filepath = "tests/test.fasta.gz"
+        mask_filepath = "tests/mask_range.tsv"
+        mask_format = "something"
+        use_gzip = "true"
+        print_mask_ranges = "true"
+        output_fasta = "test.fasta.masked.gz"
+        applymask.main(mask_filepath, mask_format, fasta_filepath, use_gzip, print_mask_ranges)
+        assert_fasta_zip(self, output_fasta, self.maskedsequence)
 
 
 

@@ -150,7 +150,42 @@ def apply_mask(mask, sequence):
 def arg_is_true(arg):
     return arg in ["true", "yes", "oui"]
 
-def main():
+def main(mask_filepath, mask_format, fasta_filepath, use_gzip, print_mask_ranges):
+    
+    #Load mask file, transform to fasta format
+    if arg_is_true(use_gzip):
+        (fasta_header, fasta_sequence, fasta_chunk_len) = load_fasta_gzip(fasta_filepath)
+    else:
+        (fasta_header, fasta_sequence, fasta_chunk_len) = load_fasta(fasta_filepath)
+
+    if mask_format == "fasta":
+        mask = load_mask_fasta(mask_filepath)
+    elif mask_format == "position":
+        mask = load_mask_positon(mask_filepath, len(fasta_sequence))
+    elif mask_format == "range":
+        mask = load_mask_range(mask_filepath, len(fasta_sequence))
+    else:
+        print(f"unknown mask format: {mask_format}")
+        print("expected one of: fasta, position, range")
+        return
+
+    new_sequence = apply_mask(mask, fasta_sequence)
+
+    fasta_filename = pathlib.Path(fasta_filepath).stem
+    if arg_is_true(use_gzip):
+        new_fasta_filepath = fasta_filename + '.masked.gz'
+    else:
+        new_fasta_filepath = fasta_filename + '.masked.fasta'
+
+    if arg_is_true(use_gzip):
+        save_fasta_gzip(new_fasta_filepath, fasta_header, new_sequence, fasta_chunk_len)
+    else:
+        save_fasta(new_fasta_filepath, fasta_header, new_sequence, fasta_chunk_len)
+
+    if arg_is_true(print_mask_ranges):
+        print(get_mask_ranges(mask))
+
+if __name__ == "__main__":
     p = argparse.ArgumentParser()
     p.add_argument("mask_filepath")
     p.add_argument("mask_format")
@@ -158,40 +193,4 @@ def main():
     p.add_argument("use_gzip")
     p.add_argument("print_mask_ranges")
     args = p.parse_args()
-
-    #Load mask file, transform to fasta format
-
-    if arg_is_true(args.use_gzip):
-        (fasta_header, fasta_sequence, fasta_chunk_len) = load_fasta_gzip(args.fasta_filepath)
-    else:
-        (fasta_header, fasta_sequence, fasta_chunk_len) = load_fasta(args.fasta_filepath)
-
-    if args.mask_format == "fasta":
-        mask = load_mask_fasta(args.mask_filepath)
-    elif args.mask_format == "position":
-        mask = load_mask_positon(args.mask_filepath, len(fasta_sequence))
-    elif args.mask_format == "range":
-        mask = load_mask_range(args.mask_filepath, len(fasta_sequence))
-    else:
-        print(f"unknown mask format: {args.mask_format}")
-        print("expected one of: fasta, position, range")
-        return
-
-    new_sequence = apply_mask(mask, fasta_sequence)
-
-    fasta_filename = pathlib.Path(args.fasta_filepath).stem
-    if arg_is_true(args.use_gzip):
-        new_fasta_filepath = fasta_filename + '.masked.gz'
-    else:
-        new_fasta_filepath = fasta_filename + '.masked.fasta'
-
-    if arg_is_true(args.use_gzip):
-        save_fasta_gzip(new_fasta_filepath, fasta_header, new_sequence, fasta_chunk_len)
-    else:
-        save_fasta(new_fasta_filepath, fasta_header, new_sequence, fasta_chunk_len)
-
-    if arg_is_true(args.print_mask_ranges):
-        print(get_mask_ranges(mask))
-
-if __name__ == "__main__":
-    main()
+    main(args.mask_filepath, args.mask_format, args.fasta_filepath, args.use_gzip, args.print_mask_ranges)
