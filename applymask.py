@@ -129,11 +129,13 @@ def save_fasta(fasta_filepath, header, sequence, chunk_len):
     with open(fasta_filepath, "w") as f:
         f.write(header + '\n')
         f.write(string_insert_newlines(sequence, chunk_len))
+        print(f'file {fasta_filepath} created.')
 
 def save_fasta_gzip(fasta_filepath, header, sequence, chunk_len):
     with gzip.open(fasta_filepath, "wb") as f:
         f.write(bytearray(header + '\n', 'utf-8'))
         f.write(bytearray(string_insert_newlines(sequence, chunk_len), 'utf-8'))
+        print(f'file {fasta_filepath} created.')
 
 def apply_mask(mask, sequence):
     new_sequence = list()

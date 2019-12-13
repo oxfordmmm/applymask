@@ -3,7 +3,7 @@
 # Run one test:  python3 test_applymask.py TestApplyMask.test_load_mask_format1
 # Only skip tests for debugging reason. All tests should be passed
 
-import io
+import os
 
 import unittest
 import applymask
@@ -144,6 +144,33 @@ class TestApplyMask(unittest.TestCase):
 
         result = applymask.string_insert_newlines(input_str,10)
         self.assertEqual(expected_str, result)
+
+    def test_save_fasta(self):
+        filepath= "tests/saved_fasta.fasta"
+        header = ">NC_000962_3"
+        sequence = "AAAAAAAAAACCCCCCCCCCGGGGGGGGGGTTTTTTTTTT"
+        chunklen = 10
+        applymask.save_fasta(filepath,header,sequence,chunklen)
+        header_out, seq_out, chunklen_out = applymask.load_fasta(filepath)
+        self.assertEqual(header, header_out)
+        self.assertEqual(chunklen, chunklen_out)
+        self.assertEqual(sequence,seq_out)
+        os.remove(filepath)
+        print(f"file {filepath} removed.")
+
+    def test_save_fasta_gzip(self):
+        filepath= "tests/saved_fasta.fasta.gz"
+        header = ">NC_000962_3"
+        sequence = "AAAAAAAAAACCCCCCCCCCGGGGGGGGGGTTTTTTTTTT"
+        chunklen = 10
+        applymask.save_fasta_gzip(filepath,header,sequence,chunklen)
+        header_out, seq_out, chunklen_out = applymask.load_fasta_gzip(filepath)
+        self.assertEqual(header, header_out)
+        self.assertEqual(chunklen, chunklen_out)
+        self.assertEqual(sequence,seq_out)
+        os.remove(filepath)
+        print(f"file {filepath} removed.")
+
 
 
 if __name__ == "__main__":
