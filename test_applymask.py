@@ -1,7 +1,7 @@
 # Test applymask.py
 # Run all tests: python3 test_applymask.py
 # Run one test:  python3 test_applymask.py TestApplyMask.test_load_mask_range_aux
-# Run code coverage: coverge run test_applymask.py 
+# Run code coverage: coverage run test_applymask.py 
 # View code coverage report: coverage report -m
 # Generate code coverage html report: coverage html
 
