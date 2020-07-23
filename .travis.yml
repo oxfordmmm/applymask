@@ -11,7 +11,8 @@ install:
  - pip install -r requirements.txt
 
 script:
- - coverage run -m unittest discover -s . -p test_*.py
+ - coverge run test_comparemask.py 
+ - coverge run test_applymask.py 
 
 after_success:
  - codecov

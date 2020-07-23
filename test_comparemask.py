@@ -12,7 +12,7 @@ def assert_mask(self, mask_name):
     mask = comparemask.load_position_mask(mask_name)
     return mask
 
-class TestApplyMask(unittest.TestCase):
+class TestCompareMask(unittest.TestCase):
     def setUp(self):
         self.expected_mask_positions = [0,59,60,119,120,179,180,239,240,299]
         self.expected_mask_strings = '0\n59\n60\n119\n120\n179\n180\n239\n240\n299'
@@ -21,7 +21,7 @@ class TestApplyMask(unittest.TestCase):
         
     def test_load_position_mask(self):
         expected = self.expected_mask_positions
-        result = assert_mask(self,"tests/mask_position.txt")
+        result = assert_mask(self,"data/mask_position.txt")
         self.assertEqual(expected, result)
     
     def test_compare_position_mask(self):
@@ -35,12 +35,12 @@ class TestApplyMask(unittest.TestCase):
 
     def test_fasta_to_posistions(self):
         expected = self.expected_mask_positions
-        result = comparemask.fasta_to_posistions("tests/mask_fasta.fasta")
+        result = comparemask.fasta_to_posistions("data/mask_fasta.fasta")
         self.assertEqual(expected, result)
 
     def test_write_position_to_file(self):
         expected = self.expected_mask_strings
-        result = comparemask.write_position_to_file(self.expected_mask_positions, 'tests/output_positions.txt')
+        result = comparemask.write_position_to_file(self.expected_mask_positions, 'data/output_positions.txt')
         self.assertEqual(expected, result)
 
 
